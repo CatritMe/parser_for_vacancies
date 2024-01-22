@@ -31,8 +31,6 @@ class HeadHunterAPI(API):
                     'town': vacancies_hh['items'][i]['area']['name'],
                     'requirement': vacancies_hh['items'][i]['snippet']['requirement']
                 }
-            except IndexError:
-                print('По ключевому слову не найдено вакансий')
             except TypeError:
                 vacan = {
                     'name': vacancies_hh['items'][i]['name'],
@@ -64,8 +62,6 @@ class SuperJobAPI(API):
                     'town': vacancies_sj['objects'][i]['town']['title'],
                     'requirement': vacancies_sj['objects'][i]['candidat']
                 }
-            except IndexError:
-                print('По ключевому слову не найдено вакансий')
             except TypeError:
                 vacan = {
                     'name': vacancies_sj['objects'][i]['profession'],
@@ -82,13 +78,16 @@ class Vacancy:
     """
     Класс для работы с вакансией
     """
-    def __init__(self, name=None, payment_from=0, payment_to=0, town=None, requirement=None):
+    def __init__(self, name=None, payment_to=0, payment_from=0, town=None, requirement=None):
         self.name = name
         try:
-            self.payment_to: int = int(payment_to)
-            self.payment_from: int = int(payment_from)
-        except TypeError:
-            print('Введите зарплату цифрами')
+            self.payment_to: int = payment_to
+        except AttributeError:
+            self.payment_to: int = 0
+        try:
+            self.payment_from: int = payment_from
+        except AttributeError:
+            self.payment_from: int = 0
         self.town = town
         self.requirement = requirement
         if self.payment_to is None and self.payment_from is None:
@@ -176,8 +175,8 @@ class JSONSaver(JSONSave):
         vacancies_list = []
         for key, item in b.items():
             vacancies_list.append(Vacancy(item['name'],
-                                          int(item['payment_to']),
-                                          int(item['payment_from']),
+                                          item['payment_to'],
+                                          item['payment_from'],
                                           item['town'],
                                           item['requirement']))
         return vacancies_list
